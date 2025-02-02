@@ -1,24 +1,52 @@
-require('dotenv').config(); 
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const ShortUrl = require('./models/shortUrl');
 const authenticate = require('./middleware/auth'); 
 const User = require('./models/User');
 const jwt = require('jsonwebtoken');
-const path = require('path'); 
+const path = require('path');
+const session = require('express-session');
+const redisClient = require('./config/redisClient'); 
+const RedisStore = require("connect-redis").default 
+
 const app = express();
 
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
 
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false } 
+}));
+
 mongoose.connect('mongodb://localhost/urlShortener', {
   useNewUrlParser: true, useUnifiedTopology: true
 });
 
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the URL shortener!');
+app.get('/', async (req, res) => {
+  const cacheKey = 'urls';
+
+  try {
+    const cachedUrls = await redisClient.get(cacheKey);
+    if (cachedUrls) {
+      return res.render('home', { urls: JSON.parse(cachedUrls) });
+    }
+
+    const urls = await ShortUrl.find();
+    await redisClient.set(cacheKey, JSON.stringify(urls), {
+      EX: 3600
+    });
+
+    res.render('home', { urls });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 const authRoutes = require('./routes/auth');
@@ -33,7 +61,7 @@ app.post('/api/auth/signup', async (req, res) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return res.status(400).json({ message: 'User already exists' });
-  }
+    }
 
   try {
     const user = new User({ email, password });

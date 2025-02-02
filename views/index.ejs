@@ -27,10 +27,10 @@
           messageDiv.className = 'alert alert-danger';
           messageDiv.innerText = 'Please enter a valid URL.';
           messageDiv.style.display = 'block';
-          return false; // Prevent form submission
+          return false;
         }
-        messageDiv.style.display = 'none'; // Hide message if valid
-        return true; // Allow form submission
+        messageDiv.style.display = 'none'; 
+        return true;
       }
     </script>
     
@@ -47,7 +47,7 @@
           <tr>
             <td><a href="<%= shortUrl.full %>"><%= shortUrl.full %></a></td>
             <td><a href="<%= shortUrl.short %>"><%= shortUrl.short %></a></td>
-            <td><%= shortUrl.clicks %></td>
+            <td>Number of clicks  <%= shortUrl.clicks %></td>
           </tr>
         <% }) %>
       </tbody>

@@ -7,7 +7,11 @@ const User = require('./models/User');
 const jwt = require('jsonwebtoken');
 const path = require('path'); 
 const app = express();
-
+const corsOptions = {
+  origin: 'https://url-frontend-1c2h.onrender.com', 
+  credentials: true, 
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));

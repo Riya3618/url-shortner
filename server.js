@@ -5,6 +5,7 @@ const ShortUrl = require('./models/shortUrl');
 const authenticate = require('./middleware/auth'); 
 const User = require('./models/User');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 const path = require('path'); 
 const app = express();
 const corsOptions = {
